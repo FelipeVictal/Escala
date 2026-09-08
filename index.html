@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Escalas Mensais</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root {
+    --azul: #2563eb;
+    --azul-escuro: #1e40af;
+    --verde: #16a34a;
+    --vermelho: #dc2626;
+    --cinza: #6b7280;
+    --fundo: #f3f4f6;
+    --borda: #e5e7eb;
+}
+* { box-sizing: border-box; }
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: var(--fundo);
+    margin: 0;
+    color: #111827;
+}
+header {
+    background: var(--azul-escuro);
+    color: #fff;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+header h1 { margin: 0; font-size: 20px; }
+header nav button {
+    background: none; border: none; color: #fff; cursor: pointer;
+    margin-left: 18px; font-size: 14px; opacity: 0.9; font-family: inherit; padding: 4px 0;
+}
+header nav button:hover { text-decoration: underline; opacity: 1; }
+.barra-arquivo {
+    background: #0f172a;
+    color: #e5e7eb;
+    padding: 8px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 13px;
+}
+.barra-arquivo .status-arquivo { display: flex; align-items: center; gap: 8px; }
+.pill { padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.pill-salvo { background: #14532d; color: #bbf7d0; }
+.pill-nao-salvo { background: #7c2d12; color: #fed7aa; }
+.barra-arquivo button {
+    background: #1e293b; color: #fff; border: 1px solid #334155; padding: 5px 12px;
+    border-radius: 6px; cursor: pointer; font-size: 12px; font-family: inherit;
+}
+.barra-arquivo button:hover { background: #334155; }
+main { max-width: 1400px; margin: 24px auto; padding: 0 20px 60px; }
+.card { background: #fff; border: 1px solid var(--borda); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+h2 { margin-top: 0; font-size: 18px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { border: 1px solid var(--borda); padding: 6px 8px; text-align: center; }
+th { background: #f9fafb; font-weight: 600; }
+.tabela-escala th.dia-fds, .tabela-escala td.dia-fds { background: #fef3c7; }
+.tabela-escala td.nome-func {
+    text-align: left; font-weight: 500; white-space: nowrap; overflow: hidden;
+    text-overflow: ellipsis; background: #fff;
+}
+.tabela-escala table { table-layout: fixed; width: 100%; }
+.tabela-escala th, .tabela-escala td { padding: 2px 1px; font-size: 10px; line-height: 1.2; }
+.tabela-escala th:first-child, .tabela-escala td.nome-func {
+    width: 110px; max-width: 110px; padding-left: 6px; font-size: 11px;
+}
+.tabela-escala select.status-select {
+    width: 100%; min-width: 0; padding: 2px 0; font-size: 10px;
+    appearance: none; -webkit-appearance: none; -moz-appearance: none;
+    text-align: center; text-align-last: center;
+    border-radius: 4px; border: 1px solid var(--borda); font-weight: 600;
+}
+select.status-select[data-status="D"] { background: #dcfce7; color: #166534; }
+select.status-select[data-status="F6"] { background: #dbeafe; color: #1e40af; }
+select.status-select[data-status="T"] { background: #fee2e2; color: #991b1b; }
+.tabela-escala td.cel-violacao { background: #fecaca !important; outline: 2px solid #dc2626; outline-offset: -2px; }
+.tabela-escala td.cel-violacao select.status-select { background: #fecaca; font-weight: 700; }
+.grupo-turno-header td { background: #111827; color: #fff; text-align: left; font-weight: 700; padding: 8px; }
+.badge-turno { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; color: #fff; margin-left: 6px; }
+.badge-abertura { background: #f59e0b; }
+.badge-fechamento { background: #6366f1; }
+.badge-madrugada { background: #0f172a; }
+.btn {
+    display: inline-block; background: var(--azul); color: #fff; border: none;
+    padding: 9px 18px; border-radius: 6px; cursor: pointer; font-size: 14px;
+    text-decoration: none; font-family: inherit;
+}
+.btn:hover { background: var(--azul-escuro); }
+.btn-secundario { background: var(--cinza); }
+.btn-perigo { background: var(--vermelho); }
+.btn-perigo:hover { background: #b91c1c; }
+form.form-simples label { display: block; margin-bottom: 4px; font-size: 13px; font-weight: 600; color: #374151; }
+form.form-simples input, form.form-simples select, .form-simples input, .form-simples select {
+    width: 100%; padding: 8px; margin-bottom: 14px; border: 1px solid var(--borda);
+    border-radius: 6px; font-size: 14px; font-family: inherit;
+}
+.lista-escalas a {
+    display: block; padding: 12px; border: 1px solid var(--borda); border-radius: 8px;
+    margin-bottom: 8px; text-decoration: none; color: #111827; cursor: pointer;
+}
+.lista-escalas a:hover { border-color: var(--azul); background: #eff6ff; }
+.alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; }
+.alert-sucesso { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.alert-erro { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+.alert-aviso { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+.legenda { display: flex; gap: 16px; margin-bottom: 14px; font-size: 13px; flex-wrap: wrap; }
+.legenda span { display: flex; align-items: center; gap: 6px; }
+.legenda i { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
+.acoes-topo { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: flex-start; }
+table.tabela-func td, table.tabela-func th { text-align: left; }
+.selecao-funcionarios { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 10px; }
+.grupo-selecao { border: 1px solid var(--borda); border-radius: 8px; padding: 10px 14px; background: #fafafa; }
+.grupo-selecao h3 { margin: 0 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: .03em; color: var(--cinza); }
+.item-checkbox { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 400; padding: 4px 0; cursor: pointer; }
+.item-checkbox input { width: auto; margin: 0; }
+details.detalhes-adicionar { display: inline-block; vertical-align: top; }
+details.detalhes-adicionar summary { list-style: none; cursor: pointer; }
+details.detalhes-adicionar summary::-webkit-details-marker { display: none; }
+.painel-adicionar { margin-top: 10px; padding: 14px; border: 1px solid var(--borda); border-radius: 8px; background: #fafafa; max-width: 700px; }
+table.tabela-domingos th, table.tabela-domingos td { text-align: center; font-size: 13px; }
+table.tabela-domingos td:first-child { text-align: left; font-weight: 500; }
+.tela-abertura { max-width: 640px; margin: 60px auto; text-align: center; }
+.tela-abertura .card { text-align: left; }
+</style>
+</head>
+<body>
+<header>
+    <h1>📅 Escalas Mensais</h1>
+    <nav id="nav-views" style="display:none;">
+        <button onclick="goHome()">Início</button>
+        <button onclick="goFuncionarios()">Funcionários</button>
+        <button onclick="goNovaEscala()">Nova Escala</button>
+    </nav>
+</header>
+<div class="barra-arquivo" id="barra-arquivo" style="display:none;"></div>
+<main>
+    <div id="flash-area"></div>
+    <div id="view-content"></div>
+</main>
+<input type="file" id="input-abrir-fallback" accept="application/json" style="display:none">
+
+<script>
+/* ==========================================================================
+   PERSISTÊNCIA: banco de dados em arquivo .json (SEM localStorage/sessionStorage)
+   ----------------------------------------------------------------------------
+   Todos os dados vivem só na memória da página enquanto você usa o portal.
+   Nada é gravado automaticamente no navegador. Para guardar de verdade, você
+   abre um arquivo .json (seu "banco de dados") e clica em "Salvar" quando
+   quiser gravar as alterações nele.
+
+   Em navegadores baseados em Chromium (Chrome, Edge, Opera) isso é feito com
+   a File System Access API: o arquivo fica "conectado" e "Salvar" grava nele
+   diretamente. Em navegadores sem esse suporte (Firefox, Safari), "Abrir"
+   usa um seletor de arquivo comum e "Salvar" baixa um .json atualizado, que
+   você deve substituir o arquivo antigo por ele.
+   ========================================================================== */
+var funcionarios = [];   // [{id, nome, turno, ativo}]
+var escalas = [];        // [{id, descricao, data_inicio, data_fim}]
+var escalasDados = {};   // { escalaId: {participantes:[ids], dias:{funcId:{data:status}}} }
+
+var fileHandle = null;       // FileSystemFileHandle, quando disponível/concedido
+var nomeArquivoAtual = null; // nome exibido do arquivo aberto
+var sujo = false;            // há alterações não salvas?
+var arquivoAberto = false;   // já abriu ou criou um banco nesta sessão?
+
+const suportaFileSystemAccess = typeof window.showOpenFilePicker === 'function';
+
+function marcarSujo() {
+    sujo = true;
+    atualizarBarraArquivo();
+}
+function marcarLimpo() {
+    sujo = false;
+    atualizarBarraArquivo();
+}
+
+window.addEventListener('beforeunload', (e) => {
+    if (sujo) { e.preventDefault(); e.returnValue = ''; }
+});
+
+/* ==========================================================================
+   CONSTANTES E FUNÇÕES DE DATA / REGRAS DE NEGÓCIO
+   ========================================================================== */
+const TURNOS = { abertura: 'Abertura', fechamento: 'Fechamento', madrugada: 'Madrugada' };
+const TURNOS_ORDEM = ['abertura', 'fechamento', 'madrugada'];
+const MESES_NOME = {1:'Janeiro',2:'Fevereiro',3:'Março',4:'Abril',5:'Maio',6:'Junho',
+                     7:'Julho',8:'Agosto',9:'Setembro',10:'Outubro',11:'Novembro',12:'Dezembro'};
+const MESES_ABREV = {1:'Jan',2:'Fev',3:'Mar',4:'Abr',5:'Mai',6:'Jun',7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'};
+const DIAS_SEMANA_CURTO = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+function pad(n) { return String(n).padStart(2, '0'); }
+function toISO(y, m, d) { return `${y}-${pad(m)}-${pad(d)}`; }
+function addDaysISO(iso, dias) {
+    const [y, m, d] = iso.split('-').map(Number);
+    const dt = new Date(Date.UTC(y, m - 1, d));
+    dt.setUTCDate(dt.getUTCDate() + dias);
+    return toISO(dt.getUTCFullYear(), dt.getUTCMonth() + 1, dt.getUTCDate());
+}
+function diaSemanaISO(iso) {
+    const [y, m, d] = iso.split('-').map(Number);
+    return new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+}
+function ehFimDeSemana(iso) { return [0, 6].includes(diaSemanaISO(iso)); }
+
+function gerarDiasPeriodo(ano, mes) {
+    const inicio = toISO(ano, mes, 16);
+    const mesFim = mes === 12 ? 1 : mes + 1;
+    const anoFim = mes === 12 ? ano + 1 : ano;
+    const fim = toISO(anoFim, mesFim, 15);
+    const dias = [];
+    let cursor = inicio;
+    while (cursor <= fim) { dias.push(cursor); cursor = addDaysISO(cursor, 1); }
+    return dias;
+}
+function labelPeriodo(inicioISO, fimISO) {
+    const [, am, ad] = inicioISO.split('-').map(Number);
+    const [by, bm, bd] = fimISO.split('-').map(Number);
+    return `${pad(ad)}/${MESES_ABREV[am]} a ${pad(bd)}/${MESES_ABREV[bm]} de ${by}`;
+}
+function formatarDataBr(iso) { const [, m, d] = iso.split('-'); return `${d}/${m}`; }
+function nomeDiaSemanaCurto(iso) { return DIAS_SEMANA_CURTO[diaSemanaISO(iso)]; }
+function ehDiaTrabalhado(status) { return status === 'T' || status === '' || status == null; }
+function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+
+/* ==========================================================================
+   ACESSO AOS DADOS (tudo em memória; quem "persiste" de fato é salvarArquivo())
+   ========================================================================== */
+function loadEscalaDados(id) { return escalasDados[id] || { participantes: [], dias: {} }; }
+function saveEscalaDados(id, dados) { escalasDados[id] = dados; marcarSujo(); }
+
+/* ==========================================================================
+   MENSAGENS (flash)
+   ========================================================================== */
+function mostrarFlash(tipo, texto) {
+    const classe = tipo === 'sucesso' ? 'alert-sucesso' : (tipo === 'aviso' ? 'alert-aviso' : 'alert-erro');
+    document.getElementById('flash-area').innerHTML = `<div class="alert ${classe}">${escapeHtml(texto)}</div>`;
+}
+function limparFlash() { document.getElementById('flash-area').innerHTML = ''; }
+
+/* ==========================================================================
+   ABRIR / CRIAR / SALVAR O ARQUIVO .json (o "banco de dados")
+   ========================================================================== */
+function construirJSONAtual() {
+    return {
+        versao: 1,
+        atualizadoEm: new Date().toISOString(),
+        funcionarios,
+        escalas,
+        escalasDados
+    };
+}
+
+function carregarDados(json) {
+    funcionarios = Array.isArray(json.funcionarios) ? json.funcionarios : [];
+    escalas = Array.isArray(json.escalas) ? json.escalas : [];
+    escalasDados = (json.escalasDados && typeof json.escalasDados === 'object') ? json.escalasDados : {};
+}
+
+async function abrirArquivo() {
+    if (suportaFileSystemAccess) {
+        try {
+            const [handle] = await window.showOpenFilePicker({
+                types: [{ description: 'Banco de dados de escalas (.json)', accept: { 'application/json': ['.json'] } }]
+            });
+            const arquivo = await handle.getFile();
+            const texto = await arquivo.text();
+            carregarDados(JSON.parse(texto));
+            fileHandle = handle;
+            nomeArquivoAtual = arquivo.name;
+            arquivoAberto = true;
+            marcarLimpo();
+            iniciarApp();
+        } catch (e) {
+            if (e.name !== 'AbortError') mostrarFlashInicial('Não foi possível abrir esse arquivo. Verifique se é um banco de dados válido (.json) gerado por este portal.');
+        }
+    } else {
+        document.getElementById('input-abrir-fallback').click();
+    }
+}
+
+function abrirArquivoFallback(ev) {
+    const arquivo = ev.target.files[0];
+    if (!arquivo) return;
+    const leitor = new FileReader();
+    leitor.onload = () => {
+        try {
+            carregarDados(JSON.parse(leitor.result));
+            fileHandle = null;
+            nomeArquivoAtual = arquivo.name;
+            arquivoAberto = true;
+            marcarLimpo();
+            iniciarApp();
+        } catch (e) {
+            mostrarFlashInicial('Não foi possível ler esse arquivo. Verifique se é um banco de dados válido (.json) gerado por este portal.');
+        }
+    };
+    leitor.readAsText(arquivo);
+    ev.target.value = '';
+}
+
+function novoBancoDeDados() {
+    funcionarios = [];
+    escalas = [];
+    escalasDados = {};
+    fileHandle = null;
+    nomeArquivoAtual = 'banco-escalas.json';
+    arquivoAberto = true;
+    sujo = true; // ainda não existe em disco — precisa salvar
+    iniciarApp();
+    mostrarFlash('aviso', 'Novo banco de dados criado em branco. Clique em "Salvar" quando quiser gravá-lo no seu computador.');
+}
+
+async function salvarArquivo() {
+    const conteudo = JSON.stringify(construirJSONAtual(), null, 2);
+
+    // 1) Já temos um arquivo conectado (aberto via seletor do sistema) -> grava direto nele
+    if (fileHandle) {
+        try {
+            const writable = await fileHandle.createWritable();
+            await writable.write(conteudo);
+            await writable.close();
+            marcarLimpo();
+            mostrarFlash('sucesso', `Banco de dados salvo em "${nomeArquivoAtual}".`);
+            return;
+        } catch (e) {
+            mostrarFlash('erro', 'Não foi possível salvar diretamente no arquivo. Tentando baixar uma cópia atualizada...');
+        }
+    }
+
+    // 2) Suporta escolher onde salvar (primeira vez, ou banco novo) -> pede local
+    if (suportaFileSystemAccess) {
+        try {
+            const handle = await window.showSaveFilePicker({
+                suggestedName: nomeArquivoAtual || 'banco-escalas.json',
+                types: [{ description: 'Banco de dados de escalas (.json)', accept: { 'application/json': ['.json'] } }]
+            });
+            const writable = await handle.createWritable();
+            await writable.write(conteudo);
+            await writable.close();
+            fileHandle = handle;
+            nomeArquivoAtual = handle.name;
+            marcarLimpo();
+            mostrarFlash('sucesso', `Banco de dados salvo em "${nomeArquivoAtual}".`);
+            return;
+        } catch (e) {
+            if (e.name === 'AbortError') return; // usuário cancelou o diálogo
+        }
+    }
+
+    // 3) Alternativa universal: baixa o arquivo (navegador sem File System Access API)
+    const blob = new Blob([conteudo], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = nomeArquivoAtual || 'banco-escalas.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    marcarLimpo();
+    mostrarFlash('aviso', `Arquivo "${a.download}" baixado. Substitua o arquivo anterior por este para manter o banco atualizado.`);
+}
+
+function fecharBancoDeDados() {
+    if (sujo && !confirm('Há alterações não salvas que serão perdidas. Fechar mesmo assim?')) return;
+    funcionarios = []; escalas = []; escalasDados = {};
+    fileHandle = null; nomeArquivoAtual = null; arquivoAberto = false; sujo = false;
+    renderTelaAbertura();
+}
+
+/* ==========================================================================
+   TELA DE ABERTURA (antes de abrir/criar um banco de dados)
+   ========================================================================== */
+function renderTelaAbertura() {
+    document.getElementById('nav-views').style.display = 'none';
+    document.getElementById('barra-arquivo').style.display = 'none';
+    limparFlash();
+    document.getElementById('view-content').innerHTML = `
+        <div class="tela-abertura">
+            <div class="card">
+                <h2>Banco de dados</h2>
+                <p style="color:#6b7280;">
+                    Este portal não guarda nada dentro do navegador. Todos os funcionários e
+                    escalas ficam em um único arquivo <strong>.json</strong> que você controla —
+                    abra um arquivo existente ou comece um novo.
+                </p>
+                <div class="acoes-topo">
+                    <button class="btn" onclick="abrirArquivo()">📂 Abrir banco de dados existente (.json)</button>
+                    <button class="btn btn-secundario" onclick="novoBancoDeDados()">🆕 Criar novo banco de dados</button>
+                </div>
+                <div id="flash-inicial"></div>
+                ${suportaFileSystemAccess
+                    ? '<p style="color:#6b7280; font-size:13px;">Este navegador salva diretamente no arquivo escolhido.</p>'
+                    : '<p style="color:#6b7280; font-size:13px;">Este navegador não permite gravar direto num arquivo local: ao salvar, um .json atualizado será baixado para você substituir o arquivo antigo.</p>'}
+            </div>
+        </div>`;
+}
+function mostrarFlashInicial(texto) {
+    const el = document.getElementById('flash-inicial');
+    if (el) el.innerHTML = `<div class="alert alert-erro" style="margin-top:14px;">${escapeHtml(texto)}</div>`;
+}
+
+function atualizarBarraArquivo() {
+    const barra = document.getElementById('barra-arquivo');
+    if (!arquivoAberto) { barra.style.display = 'none'; return; }
+    barra.style.display = 'flex';
+    barra.innerHTML = `
+        <div class="status-arquivo">
+            📄 <strong>${escapeHtml(nomeArquivoAtual || 'sem nome')}</strong>
+            <span class="pill ${sujo ? 'pill-nao-salvo' : 'pill-salvo'}">${sujo ? 'Alterações não salvas' : 'Salvo'}</span>
+        </div>
+        <div>
+            <button onclick="salvarArquivo()">💾 Salvar</button>
+            <button onclick="abrirArquivo()">📂 Abrir outro</button>
+            <button onclick="fecharBancoDeDados()">✕ Fechar</button>
+        </div>`;
+}
+
+/* ==========================================================================
+   ESTADO DE NAVEGAÇÃO E RENDERIZAÇÃO PRINCIPAL
+   ========================================================================== */
+var currentView = 'home';
+var currentEscalaId = null;
+var currentEscalaDados = null;
+
+function iniciarApp() {
+    document.getElementById('nav-views').style.display = '';
+    currentView = 'home';
+    atualizarBarraArquivo();
+    render();
+}
+
+function goHome() { limparFlash(); currentView = 'home'; render(); }
+function goFuncionarios() { limparFlash(); currentView = 'funcionarios'; render(); }
+function goNovaEscala() { limparFlash(); currentView = 'novaEscala'; render(); }
+function goEscala(id) {
+    limparFlash();
+    currentEscalaId = id;
+    currentEscalaDados = loadEscalaDados(id);
+    currentView = 'escala';
+    render();
+    revalidarGrade();
+}
+
+function render() {
+    const el = document.getElementById('view-content');
+    if (currentView === 'home') el.innerHTML = renderHome();
+    else if (currentView === 'funcionarios') el.innerHTML = renderFuncionarios();
+    else if (currentView === 'novaEscala') el.innerHTML = renderNovaEscala();
+    else if (currentView === 'escala') el.innerHTML = renderEscala();
+}
+
+function renderHome() {
+    const totalAtivos = funcionarios.filter(f => f.ativo).length;
+    const escalasOrdenadas = [...escalas].sort((a, b) => b.data_inicio.localeCompare(a.data_inicio));
+    const listaHtml = escalasOrdenadas.length === 0
+        ? '<p>Nenhuma escala cadastrada ainda. Clique em "Nova Escala" para começar.</p>'
+        : `<div class="lista-escalas">${escalasOrdenadas.map(e => `
+            <a onclick="goEscala('${e.id}')">
+                <strong>${escapeHtml(e.descricao)}</strong> — ${escapeHtml(labelPeriodo(e.data_inicio, e.data_fim))}
+                <span style="color:#6b7280;font-size:12px;">(${e.data_inicio} a ${e.data_fim})</span>
+            </a>`).join('')}</div>`;
+
+    return `
+        <div class="card">
+            <div class="acoes-topo">
+                <button class="btn" onclick="goNovaEscala()">+ Nova Escala (16 a 15)</button>
+                <button class="btn btn-secundario" onclick="goFuncionarios()">Gerenciar Funcionários</button>
+            </div>
+            <p><strong>${totalAtivos}</strong> funcionário(s) ativo(s) cadastrado(s).</p>
+        </div>
+        <div class="card">
+            <h2>Escalas cadastradas</h2>
+            ${listaHtml}
+        </div>`;
+}
+
+function renderFuncionarios() {
+    const lista = [...funcionarios].sort((a, b) => a.turno.localeCompare(b.turno) || a.nome.localeCompare(b.nome));
+    const linhas = lista.length === 0
+        ? '<p>Nenhum funcionário cadastrado ainda.</p>'
+        : `<table class="tabela-func">
+            <thead><tr><th>Nome</th><th>Turno</th><th>Status</th><th>Ações</th></tr></thead>
+            <tbody>
+                ${lista.map(f => `
+                <tr>
+                    <td>${escapeHtml(f.nome)}</td>
+                    <td><span class="badge-turno badge-${f.turno}">${TURNOS[f.turno]}</span></td>
+                    <td>${f.ativo ? 'Ativo' : 'Inativo'}</td>
+                    <td>
+                        <a href="#" onclick="toggleFuncionario('${f.id}');return false;">${f.ativo ? 'Inativar' : 'Ativar'}</a>
+                        &nbsp;|&nbsp;
+                        <a href="#" onclick="excluirFuncionario('${f.id}');return false;" style="color:#dc2626;">Excluir</a>
+                    </td>
+                </tr>`).join('')}
+            </tbody>
+        </table>`;
+
+    return `
+        <div class="card">
+            <h2>Cadastrar funcionário</h2>
+            <form class="form-simples" style="max-width:420px;" onsubmit="return criarFuncionario(event)">
+                <label for="input-nome">Nome</label>
+                <input type="text" id="input-nome" required placeholder="Ex.: Maria Silva">
+                <label for="input-turno">Turno / Período</label>
+                <select id="input-turno" required>
+                    <option value="">Selecione...</option>
+                    ${TURNOS_ORDEM.map(t => `<option value="${t}">${TURNOS[t]}</option>`).join('')}
+                </select>
+                <button type="submit" class="btn">Cadastrar</button>
+            </form>
+        </div>
+        <div class="card">
+            <h2>Funcionários cadastrados</h2>
+            ${linhas}
+        </div>`;
+}
+
+function renderNovaEscala() {
+    const ativos = funcionarios.filter(f => f.ativo);
+    if (ativos.length === 0) {
+        return `<div class="card">
+            <p>Você ainda não tem funcionários ativos cadastrados.</p>
+            <button class="btn" onclick="goFuncionarios()">Cadastrar funcionários</button>
+        </div>`;
+    }
+    const porTurno = { abertura: [], fechamento: [], madrugada: [] };
+    ativos.forEach(f => porTurno[f.turno].push(f));
+
+    const hoje = new Date();
+    const mesAtual = hoje.getMonth() + 1;
+    const anoAtual = hoje.getFullYear();
+
+    const gruposHtml = TURNOS_ORDEM.map(t => porTurno[t].length ? `
+        <div class="grupo-selecao">
+            <h3>${TURNOS[t]}</h3>
+            ${porTurno[t].map(f => `
+                <label class="item-checkbox">
+                    <input type="checkbox" class="chk-func" value="${f.id}" checked> ${escapeHtml(f.nome)}
+                </label>`).join('')}
+        </div>` : '').join('');
+
+    return `
+        <div class="card">
+            <h2>Criar nova escala mensal</h2>
+            <p style="color:#6b7280; font-size:14px;">
+                O período é sempre do dia <strong>16</strong> do mês selecionado até o dia <strong>15</strong> do mês seguinte.
+            </p>
+            <div style="max-width:420px;">
+                <label for="ne-mes">Mês de início (dia 16)</label>
+                <select id="ne-mes">
+                    ${Object.entries(MESES_NOME).map(([n, l]) => `<option value="${n}" ${Number(n) === mesAtual ? 'selected' : ''}>${l}</option>`).join('')}
+                </select>
+                <label for="ne-ano">Ano</label>
+                <input type="number" id="ne-ano" value="${anoAtual}" min="2000" max="2100">
+                <label for="ne-descricao">Descrição (opcional)</label>
+                <input type="text" id="ne-descricao" placeholder="Ex.: Escala Loja Centro - Outubro/Novembro">
+            </div>
+            <label style="margin-top:6px;">Quem participa desta escala?</label>
+            <div class="acoes-topo" style="margin-bottom:10px;">
+                <button type="button" class="btn btn-secundario" onclick="marcarTodos(true)">Selecionar todos</button>
+                <button type="button" class="btn btn-secundario" onclick="marcarTodos(false)">Limpar seleção</button>
+            </div>
+            <div class="selecao-funcionarios">${gruposHtml}</div>
+            <button class="btn" style="margin-top:16px;" onclick="criarEscala()">Criar escala</button>
+        </div>`;
+}
+
+function renderEscala() {
+    const escala = escalas.find(e => e.id === currentEscalaId);
+    if (!escala) {
+        return `<div class="card"><p>Escala não encontrada.</p><button class="btn" onclick="goHome()">Voltar</button></div>`;
+    }
+    const [anoIni, mesIni] = escala.data_inicio.split('-').map(Number);
+    const dias = gerarDiasPeriodo(anoIni, mesIni);
+
+    const participantesInfo = currentEscalaDados.participantes
+        .map(id => funcionarios.find(f => f.id === id))
+        .filter(Boolean);
+    const porTurno = { abertura: [], fechamento: [], madrugada: [] };
+    participantesInfo.forEach(f => porTurno[f.turno].push(f));
+
+    const idsAtuais = new Set(currentEscalaDados.participantes);
+    const disponiveis = funcionarios.filter(f => f.ativo && !idsAtuais.has(f.id));
+    const disponiveisPorTurno = { abertura: [], fechamento: [], madrugada: [] };
+    disponiveis.forEach(f => disponiveisPorTurno[f.turno].push(f));
+
+    const theadDias = dias.map(d => `
+        <th class="${ehFimDeSemana(d) ? 'dia-fds' : ''}" data-data="${d}">${nomeDiaSemanaCurto(d)}<br>${formatarDataBr(d)}</th>
+    `).join('');
+
+    let tbodyHtml = '';
+    TURNOS_ORDEM.forEach(t => {
+        if (!porTurno[t].length) return;
+        tbodyHtml += `<tr class="grupo-turno-header"><td colspan="${dias.length + 1}">${TURNOS[t]}</td></tr>`;
+        porTurno[t].forEach(f => {
+            tbodyHtml += `<tr data-func-id="${f.id}" data-nome="${escapeHtml(f.nome)}" data-turno="${f.turno}">`;
+            tbodyHtml += `<td class="nome-func">${escapeHtml(f.nome)}${f.ativo ? '' : ' <em style="color:#9ca3af;">(inativo)</em>'}</td>`;
+            dias.forEach(d => {
+                const valor = (currentEscalaDados.dias[f.id] && currentEscalaDados.dias[f.id][d]) || '';
+                tbodyHtml += `<td class="${ehFimDeSemana(d) ? 'dia-fds' : ''}">
+                    <select class="status-select" data-status="${valor}" data-data="${d}"
+                        onchange="onCelulaChange('${f.id}','${d}',this.value); this.dataset.status=this.value;">
+                        <option value="" ${valor === '' ? 'selected' : ''}>&nbsp;</option>
+                        <option value="T" ${valor === 'T' ? 'selected' : ''}>T</option>
+                        <option value="D" ${valor === 'D' ? 'selected' : ''}>D</option>
+                        <option value="F6" ${valor === 'F6' ? 'selected' : ''}>F6</option>
+                    </select>
+                </td>`;
+            });
+            tbodyHtml += `</tr>`;
+        });
+    });
+
+    const domingos = dias.filter(d => diaSemanaISO(d) === 0);
+    const contagemDomingos = domingos.map(d => {
+        const c = { total: 0, abertura: 0, fechamento: 0, madrugada: 0 };
+        participantesInfo.forEach(f => {
+            const status = (currentEscalaDados.dias[f.id] && currentEscalaDados.dias[f.id][d]) || '';
+            if (ehDiaTrabalhado(status)) { c.total++; c[f.turno]++; }
+        });
+        return { data: d, ...c };
+    });
+
+    const gruposAdicionarHtml = TURNOS_ORDEM.map(t => disponiveisPorTurno[t].length ? `
+        <div class="grupo-selecao">
+            <h3>${TURNOS[t]}</h3>
+            ${disponiveisPorTurno[t].map(f => `
+                <label class="item-checkbox">
+                    <input type="checkbox" class="chk-add" value="${f.id}"> ${escapeHtml(f.nome)}
+                </label>`).join('')}
+        </div>` : '').join('');
+
+    return `
+        <div id="area-alertas"></div>
+        <div class="card">
+            <h2>${escapeHtml(escala.descricao)}</h2>
+            <p style="color:#6b7280;">Período: ${escapeHtml(labelPeriodo(escala.data_inicio, escala.data_fim))}</p>
+
+            <div class="legenda">
+                <span><i style="background:#fff;border:1px solid #9ca3af;"></i> (em branco) = Trabalho</span>
+                <span><i style="background:#fee2e2;border:1px solid #991b1b;"></i> T = Trabalho</span>
+                <span><i style="background:#dcfce7;border:1px solid #166534;"></i> D = Descanso</span>
+                <span><i style="background:#dbeafe;border:1px solid #1e40af;"></i> F6 = Folga antes do 1º domingo de folga</span>
+                <span><i style="background:#fef3c7;border:1px solid #92400e;"></i> Coluna = Sábado / Domingo</span>
+                <span><i style="background:#fecaca;border:2px solid #dc2626;"></i> Célula = mais de 7 dias seguidos sem folga</span>
+            </div>
+
+            <div class="acoes-topo">
+                <details class="detalhes-adicionar">
+                    <summary class="btn btn-secundario">+ Adicionar funcionário a esta escala</summary>
+                    <div class="painel-adicionar">
+                        ${disponiveis.length === 0
+                            ? '<p style="margin:10px 0;">Todos os funcionários ativos já fazem parte desta escala.</p>'
+                            : `<div class="selecao-funcionarios" style="margin-top:12px;">${gruposAdicionarHtml}</div>
+                               <button class="btn" style="margin-top:8px;" onclick="adicionarFuncionariosNaEscala()">Adicionar à escala</button>`}
+                    </div>
+                </details>
+                <button class="btn btn-perigo" onclick="excluirEscala()">Excluir escala</button>
+            </div>
+
+            ${participantesInfo.length === 0 ? '<p>Nenhum funcionário nesta escala ainda. Use "+ Adicionar funcionário a esta escala" acima.</p>' : `
+            <div class="tabela-escala">
+                <table id="tabela-grade">
+                    <thead><tr><th style="position:sticky;left:0;background:#f9fafb;">Funcionário</th>${theadDias}</tr></thead>
+                    <tbody>${tbodyHtml}</tbody>
+                </table>
+            </div>
+            <p style="color:#6b7280; font-size:13px; margin-top:12px;">
+                As alterações acima já ficam guardadas nesta sessão automaticamente. Clique em
+                <strong>"💾 Salvar"</strong> na barra superior para gravar tudo no seu arquivo .json.
+            </p>`}
+        </div>
+
+        ${domingos.length ? `
+        <div class="card">
+            <h2>Cobertura aos domingos</h2>
+            <p style="color:#6b7280; font-size:14px;">
+                Quantidade de pessoas trabalhando em cada domingo do período (atualiza automaticamente conforme você edita a grade acima).
+            </p>
+            <table class="tabela-domingos">
+                <thead><tr><th>Domingo</th><th>Total trabalhando</th><th>Abertura</th><th>Fechamento</th><th>Madrugada</th></tr></thead>
+                <tbody>
+                    ${contagemDomingos.map(c => `
+                    <tr data-domingo="${c.data}">
+                        <td>${formatarDataBr(c.data)}</td>
+                        <td id="dom-total-${c.data}"><strong>${c.total}</strong></td>
+                        <td id="dom-abertura-${c.data}">${c.abertura}</td>
+                        <td id="dom-fechamento-${c.data}">${c.fechamento}</td>
+                        <td id="dom-madrugada-${c.data}">${c.madrugada}</td>
+                    </tr>`).join('')}
+                </tbody>
+            </table>
+        </div>` : ''}
+    `;
+}
+
+/* ==========================================================================
+   AÇÕES: FUNCIONÁRIOS
+   ========================================================================== */
+function criarFuncionario(ev) {
+    ev.preventDefault();
+    const nome = document.getElementById('input-nome').value.trim();
+    const turno = document.getElementById('input-turno').value;
+    if (!nome || !TURNOS[turno]) {
+        mostrarFlash('erro', 'Preencha o nome e selecione um turno válido.');
+        return false;
+    }
+    funcionarios.push({ id: uid(), nome, turno, ativo: true });
+    marcarSujo();
+    mostrarFlash('sucesso', 'Funcionário cadastrado. Não esqueça de clicar em "Salvar" para gravar no arquivo.');
+    render();
+    return false;
+}
+
+function toggleFuncionario(id) {
+    const f = funcionarios.find(x => x.id === id);
+    if (!f) return;
+    f.ativo = !f.ativo;
+    marcarSujo();
+    render();
+}
+
+function excluirFuncionario(id) {
+    if (!confirm('Excluir este funcionário? Isso também remove seus registros das escalas.')) return;
+    funcionarios = funcionarios.filter(f => f.id !== id);
+
+    Object.keys(escalasDados).forEach(escalaId => {
+        const dados = escalasDados[escalaId];
+        if (dados.participantes.includes(id)) {
+            dados.participantes = dados.participantes.filter(pid => pid !== id);
+            delete dados.dias[id];
+            if (currentEscalaId === escalaId) currentEscalaDados = dados;
+        }
+    });
+
+    marcarSujo();
+    mostrarFlash('sucesso', 'Funcionário excluído. Clique em "Salvar" para gravar essa alteração.');
+    render();
+}
+
+/* ==========================================================================
+   AÇÕES: NOVA ESCALA
+   ========================================================================== */
+function marcarTodos(valor) {
+    document.querySelectorAll('.chk-func').forEach(chk => { chk.checked = valor; });
+}
+
+function criarEscala() {
+    const mes = Number(document.getElementById('ne-mes').value);
+    const ano = Number(document.getElementById('ne-ano').value);
+    let descricao = document.getElementById('ne-descricao').value.trim();
+    const selecionados = Array.from(document.querySelectorAll('.chk-func:checked')).map(el => el.value);
+
+    if (!ano || ano < 2000 || ano > 2100 || !mes || mes < 1 || mes > 12) {
+        mostrarFlash('erro', 'Informe um mês e ano válidos.');
+        return;
+    }
+    if (selecionados.length === 0) {
+        mostrarFlash('erro', 'Selecione ao menos um funcionário para participar da escala.');
+        return;
+    }
+
+    const dias = gerarDiasPeriodo(ano, mes);
+    const dataInicio = dias[0], dataFim = dias[dias.length - 1];
+    if (!descricao) descricao = 'Escala ' + labelPeriodo(dataInicio, dataFim);
+
+    const id = uid();
+    escalas.push({ id, descricao, data_inicio: dataInicio, data_fim: dataFim });
+
+    const dadosEscala = { participantes: [...selecionados], dias: {} };
+    selecionados.forEach(fid => {
+        dadosEscala.dias[fid] = {};
+        dias.forEach(d => { dadosEscala.dias[fid][d] = ''; });
+    });
+    saveEscalaDados(id, dadosEscala); // já marca como "sujo"
+
+    goEscala(id);
+}
+
+/* ==========================================================================
+   AÇÕES: TELA DA ESCALA
+   ========================================================================== */
+function onCelulaChange(funcId, data, valor) {
+    if (!currentEscalaDados.dias[funcId]) currentEscalaDados.dias[funcId] = {};
+    currentEscalaDados.dias[funcId][data] = valor;
+    marcarSujo();
+    revalidarGrade();
+}
+
+function excluirEscala() {
+    if (!confirm('Excluir esta escala inteira?')) return;
+    escalas = escalas.filter(e => e.id !== currentEscalaId);
+    delete escalasDados[currentEscalaId];
+    marcarSujo();
+    mostrarFlash('sucesso', 'Escala excluída. Clique em "Salvar" para gravar essa alteração.');
+    goHome();
+}
+
+function adicionarFuncionariosNaEscala() {
+    const checked = Array.from(document.querySelectorAll('.chk-add:checked')).map(el => el.value);
+    if (checked.length === 0) return;
+
+    const escala = escalas.find(e => e.id === currentEscalaId);
+    const [anoIni, mesIni] = escala.data_inicio.split('-').map(Number);
+    const dias = gerarDiasPeriodo(anoIni, mesIni);
+
+    checked.forEach(id => {
+        if (!currentEscalaDados.participantes.includes(id)) currentEscalaDados.participantes.push(id);
+        if (!currentEscalaDados.dias[id]) currentEscalaDados.dias[id] = {};
+        dias.forEach(d => {
+            if (!(d in currentEscalaDados.dias[id])) currentEscalaDados.dias[id][d] = '';
+        });
+    });
+
+    marcarSujo();
+    mostrarFlash('sucesso', 'Funcionário(s) adicionado(s) à escala. Clique em "Salvar" para gravar essa alteração.');
+    render();
+    revalidarGrade();
+}
+
+/* ==========================================================================
+   VALIDAÇÃO EM TEMPO REAL (roda a cada alteração de qualquer select)
+   ========================================================================== */
+function revalidarGrade() {
+    const tabela = document.getElementById('tabela-grade');
+    if (!tabela) return;
+
+    const linhas = tabela.querySelectorAll('tbody tr[data-func-id]');
+    const violacoes = [];
+    const LIMITE = 7;
+
+    linhas.forEach(tr => {
+        const funcId = tr.dataset.funcId;
+        const nome = tr.dataset.nome;
+        const diasDoFunc = currentEscalaDados.dias[funcId] || {};
+        const selects = tr.querySelectorAll('select.status-select');
+
+        let streak = 0, streakInicio = null, anterior = null;
+        function fecharStreak(fim) {
+            if (streak > LIMITE) violacoes.push({ funcId, nome, inicio: streakInicio, fim, dias: streak });
+            streak = 0; streakInicio = null;
+        }
+        selects.forEach(sel => {
+            const d = sel.dataset.data;
+            const val = diasDoFunc[d] || '';
+            if (ehDiaTrabalhado(val)) {
+                if (streak === 0) streakInicio = d;
+                streak++;
+            } else {
+                fecharStreak(anterior);
+            }
+            anterior = d;
+        });
+        fecharStreak(anterior);
+
+        selects.forEach(sel => {
+            const d = sel.dataset.data;
+            const emViolacao = violacoes.some(v => v.funcId === funcId && d >= v.inicio && d <= v.fim);
+            sel.closest('td').classList.toggle('cel-violacao', emViolacao);
+        });
+    });
+
+    atualizarAreaAlertas(violacoes);
+    atualizarContagemDomingosDOM();
+}
+
+function atualizarAreaAlertas(violacoes) {
+    const area = document.getElementById('area-alertas');
+    if (!area) return;
+    if (violacoes.length === 0) { area.innerHTML = ''; return; }
+    let html = '<div class="alert alert-aviso"><strong>⚠ Atenção — funcionários ultrapassando 7 dias seguidos de trabalho sem folga:</strong><ul style="margin:8px 0 0 18px;">';
+    violacoes.forEach(v => {
+        html += `<li><strong>${escapeHtml(v.nome)}</strong>: ${v.dias} dias seguidos trabalhando (${formatarDataBr(v.inicio)} a ${formatarDataBr(v.fim)})</li>`;
+    });
+    html += '</ul></div>';
+    area.innerHTML = html;
+}
+
+function atualizarContagemDomingosDOM() {
+    const escala = escalas.find(e => e.id === currentEscalaId);
+    if (!escala) return;
+    const [anoIni, mesIni] = escala.data_inicio.split('-').map(Number);
+    const dias = gerarDiasPeriodo(anoIni, mesIni);
+    const domingos = dias.filter(d => diaSemanaISO(d) === 0);
+    const participantesInfo = currentEscalaDados.participantes.map(id => funcionarios.find(f => f.id === id)).filter(Boolean);
+
+    domingos.forEach(d => {
+        const c = { total: 0, abertura: 0, fechamento: 0, madrugada: 0 };
+        participantesInfo.forEach(f => {
+            const val = (currentEscalaDados.dias[f.id] && currentEscalaDados.dias[f.id][d]) || '';
+            if (ehDiaTrabalhado(val)) { c.total++; c[f.turno]++; }
+        });
+        const elTotal = document.getElementById('dom-total-' + d);
+        if (elTotal) elTotal.innerHTML = '<strong>' + c.total + '</strong>';
+        ['abertura', 'fechamento', 'madrugada'].forEach(t => {
+            const el = document.getElementById('dom-' + t + '-' + d);
+            if (el) el.textContent = c[t];
+        });
+    });
+}
+
+/* ==========================================================================
+   INICIALIZAÇÃO
+   ========================================================================== */
+document.getElementById('input-abrir-fallback').addEventListener('change', abrirArquivoFallback);
+renderTelaAbertura();
+</script>
+</body>
+</html>
