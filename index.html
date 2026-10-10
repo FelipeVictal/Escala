@@ -130,6 +130,27 @@ table.tabela-domingos th, table.tabela-domingos td { text-align: center; font-si
 table.tabela-domingos td:first-child { text-align: left; font-weight: 500; }
 .tela-abertura { max-width: 640px; margin: 60px auto; text-align: center; }
 .tela-abertura .card { text-align: left; }
+
+/* ===== Impressão: imprime somente a escala (título, período, legenda e grade) ===== */
+@page { size: A4 landscape; margin: 10mm; }
+@media print {
+    html, body { background: #fff !important; }
+    header, .barra-arquivo, #flash-area, #area-alertas, .no-print { display: none !important; }
+    main { margin: 0; padding: 0; max-width: none; }
+    .card { border: none; padding: 0; margin: 0; border-radius: 0; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .tabela-escala td.cel-violacao { outline: none; background: inherit !important; }
+    .tabela-escala td.cel-violacao.dia-fds { background: #fef3c7 !important; }
+    .tabela-escala th, .tabela-escala td { font-size: 9px; }
+    .tabela-escala select.status-select { border: none; }
+    /* destaque de violação (vermelho) não deve sair no papel: volta às cores normais de D/F6/T */
+    .tabela-escala td.cel-violacao select.status-select { background: #fff; font-weight: 600; }
+    .tabela-escala td.cel-violacao select.status-select[data-status="D"] { background: #dcfce7; }
+    .tabela-escala td.cel-violacao select.status-select[data-status="F6"] { background: #dbeafe; }
+    .tabela-escala td.cel-violacao select.status-select[data-status="T"] { background: #fee2e2; }
+    .tabela-escala tr { page-break-inside: avoid; }
+    .tabela-escala th:first-child, .tabela-escala td.nome-func { position: static; }
+}
 </style>
 </head>
 <body>
@@ -315,7 +336,7 @@ function novoBancoDeDados() {
     escalas = [];
     escalasDados = {};
     fileHandle = null;
-    nomeArquivoAtual = 'banco-escalas(1).json';
+    nomeArquivoAtual = 'banco-escalas.json';
     arquivoAberto = true;
     sujo = true; // ainda não existe em disco — precisa salvar
     iniciarApp();
@@ -655,10 +676,11 @@ function renderEscala() {
                 <span><i style="background:#dcfce7;border:1px solid #166534;"></i> D = Descanso</span>
                 <span><i style="background:#dbeafe;border:1px solid #1e40af;"></i> F6 = Folga antes do 1º domingo de folga</span>
                 <span><i style="background:#fef3c7;border:1px solid #92400e;"></i> Coluna = Sábado / Domingo</span>
-                <span><i style="background:#fecaca;border:2px solid #dc2626;"></i> Célula = mais de 7 dias seguidos sem folga</span>
+                <span class="no-print"><i style="background:#fecaca;border:2px solid #dc2626;"></i> Célula = mais de 7 dias seguidos sem folga</span>
             </div>
 
-            <div class="acoes-topo">
+            <div class="acoes-topo no-print">
+                <button class="btn" onclick="imprimirEscala()">🖨 Imprimir escala</button>
                 <details class="detalhes-adicionar">
                     <summary class="btn btn-secundario">+ Adicionar funcionário a esta escala</summary>
                     <div class="painel-adicionar">
@@ -678,14 +700,14 @@ function renderEscala() {
                     <tbody>${tbodyHtml}</tbody>
                 </table>
             </div>
-            <p style="color:#6b7280; font-size:13px; margin-top:12px;">
+            <p class="no-print" style="color:#6b7280; font-size:13px; margin-top:12px;">
                 As alterações acima já ficam guardadas nesta sessão automaticamente. Clique em
                 <strong>"💾 Salvar"</strong> na barra superior para gravar tudo no seu arquivo .json.
             </p>`}
         </div>
 
         ${domingos.length ? `
-        <div class="card">
+        <div class="card no-print">
             <h2>Cobertura aos domingos</h2>
             <p style="color:#6b7280; font-size:14px;">
                 Quantidade de pessoas trabalhando em cada domingo do período (atualiza automaticamente conforme você edita a grade acima).
@@ -798,6 +820,14 @@ function onCelulaChange(funcId, data, valor) {
     currentEscalaDados.dias[funcId][data] = valor;
     marcarSujo();
     revalidarGrade();
+}
+
+function imprimirEscala() {
+    if (!document.getElementById('tabela-grade')) {
+        mostrarFlash('aviso', 'Não há funcionários nesta escala para imprimir.');
+        return;
+    }
+    window.print();
 }
 
 function excluirEscala() {
